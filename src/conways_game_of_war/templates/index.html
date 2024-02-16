@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Conway's Game of War</title>
+  </head>
+  <body> 
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <div class="container">
+      <h1>Conway's Game of War</h1>
+      <div id="game" hx-get="/game_state" hx-trigger="load" hx-swap="outerHTML"></div>
+    </div>
+  </body>
