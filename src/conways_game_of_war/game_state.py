@@ -1,4 +1,5 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
+from loguru import logger
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
@@ -90,7 +91,7 @@ class GameState:
                         (y + j) % self.board_size_y
                     ]
                     if neighbor_cell.alive and neighbor_cell.owner is not None and neighbor_cell.owner != player:
-                        print(f"Player {player} is fighting player {neighbor_cell.owner}")
+                        logger.info(f"Player {player} is fighting player {neighbor_cell.owner}")
                         neighbor_cell.alive = False
                         self.board[x][y].alive = False
                         return True
