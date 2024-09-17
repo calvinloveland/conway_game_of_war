@@ -36,11 +36,15 @@ class GameState:
         ]
         if board is not None:
             self.board = board
+            self.board_size_y = len(self.board)
+            self.board_size_x = len(self.board[0])
         else:
             self.board = [
                 [CellState() for _ in range(DEFAULT_BOARD_SIZE_Y)]
                 for _ in range(DEFAULT_BOARD_SIZE_X)
             ]
+            self.board_size_y = len(self.board)
+            self.board_size_x = len(self.board[0])
             self.init_players()
         self.board_size_y = len(self.board)
         self.board_size_x = len(self.board[0])
