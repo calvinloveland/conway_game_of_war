@@ -40,14 +40,14 @@ class GameState:
             self.board_size_x = len(self.board[0])
         else:
             self.board = [
-                [CellState() for _ in range(DEFAULT_BOARD_SIZE_Y)]
-                for _ in range(DEFAULT_BOARD_SIZE_X)
+                [CellState() for _ in range(DEFAULT_BOARD_SIZE_X)]
+                for _ in range(DEFAULT_BOARD_SIZE_Y)
             ]
             self.board_size_y = len(self.board)
             self.board_size_x = len(self.board[0])
             self.init_players()
-        self.board_size_y = len(self.board)
         self.board_size_x = len(self.board[0])
+        self.board_size_y = len(self.board)
 
     def init_players(self):
         for player in self.players:
