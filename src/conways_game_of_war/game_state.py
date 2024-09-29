@@ -1,4 +1,5 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
+
 from loguru import logger
 from dataclasses import dataclass
 
@@ -18,6 +19,7 @@ PLAYER_2_START_POINT = (DEFAULT_BOARD_SIZE_X - 20, DEFAULT_BOARD_SIZE_Y - 20)
 @dataclass
 class Player:
     """Represents a player in the game."""
+
     color: tuple
     start_point: tuple
     energy: float = 0.0
@@ -26,6 +28,7 @@ class Player:
 @dataclass
 class CellState:
     """Represents the state of a cell in the game."""
+
     alive: bool = False
     immortal: bool = False
     crop_level: float = 2.0 / (2**4)
