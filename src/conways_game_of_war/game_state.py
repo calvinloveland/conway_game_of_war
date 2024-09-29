@@ -244,5 +244,11 @@ class GameState:
 
     def flip_cell(self, x, y):
         """Flip the state of a cell."""
-        self.board[x][y].alive = not self.board[x][y].alive
+        if self.is_cell_owned_by_player(x, y):
+            self.board[x][y].alive = not self.board[x][y].alive
         return self.board[x][y].alive
+
+    def is_cell_owned_by_player(self, x, y):
+        """Check if a cell is owned by the current player."""
+        cell = self.board[x][y]
+        return cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]

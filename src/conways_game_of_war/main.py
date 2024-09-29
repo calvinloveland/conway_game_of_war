@@ -4,6 +4,7 @@ import flask
 from conways_game_of_war import game_state
 
 app = flask.Flask(__name__)
+app.secret_key = "supersecretkey"  # Replace with a secure key in production
 
 GAME = game_state.GameState()
 ZOOM_LEVEL = 1.0
@@ -17,6 +18,8 @@ def main():
 @app.route("/")
 def index():
     """Render the index page with window dimensions and zoom level."""
+    if "player" not in flask.session:
+        return flask.redirect("/select_player")
     window_width = flask.request.args.get("width", type=int, default=800)
     window_height = flask.request.args.get("height", type=int, default=600)
     zoom_level = flask.request.args.get("zoom", type=float, default=1.0)
@@ -27,6 +30,20 @@ def index():
         window_height=window_height,
         zoom_level=zoom_level,
     )
+
+
+@app.route("/select_player")
+def select_player():
+    """Render the player selection screen."""
+    return flask.render_template("select_player.html")
+
+
+@app.route("/set_player", methods=["POST"])
+def set_player():
+    """Set the selected player in the session."""
+    player = flask.request.form.get("player")
+    flask.session["player"] = player
+    return flask.redirect("/")
 
 
 @app.route("/game_state")
