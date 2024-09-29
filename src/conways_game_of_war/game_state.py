@@ -15,6 +15,7 @@ PLAYER_2_START_POINT = (DEFAULT_BOARD_SIZE_X - 20, DEFAULT_BOARD_SIZE_Y - 20)
 
 
 class Player:
+    """Represents a player in the game."""
     def __init__(self, color, start_point):
         self.color = color
         self.start_point = start_point
@@ -22,6 +23,7 @@ class Player:
 
 
 class CellState:
+    """Represents the state of a cell in the game."""
     def __init__(
         self, alive=False, immortal=False, crop_level=2.0 / (2**4), owner=None
     ):
@@ -33,6 +35,7 @@ class CellState:
 
 
 class GameState:
+    """Represents the state of the game board."""
     def __init__(self, board=None, board_size_x=DEFAULT_BOARD_SIZE_X, board_size_y=DEFAULT_BOARD_SIZE_Y):
         self.players = [
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
@@ -59,13 +62,14 @@ class GameState:
             assert len(row) == self.board_size_y
 
     def init_players(self):
+        """Initialize the players on the board."""
         for player in self.players:
             self.board[player.start_point[0]][player.start_point[1]].owner = player
             self.board[player.start_point[0]][player.start_point[1]].alive = True
             self.board[player.start_point[0]][player.start_point[1]].immortal = True
 
     def update_ownership_around_cell(self, x, y):
-        """Update the ownership of the cells around a cell"""
+        """Update the ownership of the cells around a cell."""
         # Whoever has the most friendly neighbors gets the cell
         player_counts = [0 for _ in range(len(self.players))]
         for i in range(-1, 2):
@@ -89,25 +93,22 @@ class GameState:
                 cell.owner = self.players[i]
 
     def count_friendly_neighbors(self, x, y, player):
-        """Count neighbors and wrap around the board"""
+        """Count neighbors and wrap around the board."""
         count = 0
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if i == 0 and j == 0:
-                    continue
-                if len(self.board) <= (x + i) % self.board_size_x:
-                    logger.error(f"Index out of range: {(x + i) % self.board_size_x}")
-                if len(self.board[0]) <= (y + j) % self.board_size_y:
-                    logger.error(f"Index out of range: {(y + j) % self.board_size_y}")
-                cell = self.board[(x + i) % self.board_size_x][
-                    (y + j) % self.board_size_y
-                ]
-                if cell.alive and cell.owner == player:
-                    count += 1
+        for i, j in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+            if len(self.board) <= (x + i) % self.board_size_x:
+                logger.error(f"Index out of range: {(x + i) % self.board_size_x}")
+            if len(self.board[0]) <= (y + j) % self.board_size_y:
+                logger.error(f"Index out of range: {(y + j) % self.board_size_y}")
+            cell = self.board[(x + i) % self.board_size_x][
+                (y + j) % self.board_size_y
+            ]
+            if cell.alive and cell.owner == player:
+                count += 1
         return count
 
     def update_friend_counts(self):
-        """Update the number of friendly neighbors for each cell"""
+        """Update the number of friendly neighbors for each cell."""
         for x in range(self.board_size_x):
             for y in range(self.board_size_y):
                 self.board[x][y].friendly_neighbors = self.count_friendly_neighbors(
@@ -121,7 +122,7 @@ class GameState:
         """
 
         def fight_unfriendly_neighbors(x, y, player):
-            """Kill unfriendly neighbors and wrap around the board"""
+            """Kill unfriendly neighbors and wrap around the board."""
             if self.board[x][y].owner is None:
                 return False
             for i in range(-1, 2):
@@ -177,7 +178,7 @@ class GameState:
         self.update_ownership_around_cell(x, y)
 
     def update(self):
-        """Update the board"""
+        """Update the board."""
         self.update_friend_counts()
         for x in range(self.board_size_x):
             for y in range(self.board_size_y):
@@ -185,7 +186,7 @@ class GameState:
         return self.board
 
     def generate_cell_color(self, x, y):
-        """Generate the color of a cell"""
+        """Generate the color of a cell."""
         color = (50, 50, 50)
         cell = self.board[x][y]
         if cell.alive and cell.owner is not None:
@@ -194,7 +195,7 @@ class GameState:
         return color
 
     def generate_cell_border_color(self, x, y):
-        """Generate the border color of a cell"""
+        """Generate the border color of a cell."""
         color = (150, 150, 150)
         cell = self.board[x][y]
         if cell.owner is not None:
