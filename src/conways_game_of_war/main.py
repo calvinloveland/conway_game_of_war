@@ -35,3 +35,6 @@ def update_cell():
     y = int(flask.request.args.get("y"))
     GAME.flip_cell(x, y)
     return GAME.board_to_html()
+
+if __name__ == "__main__":
+    main()
