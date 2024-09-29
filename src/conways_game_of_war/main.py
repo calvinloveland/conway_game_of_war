@@ -4,6 +4,7 @@ from conways_game_of_war import game_state
 app = flask.Flask(__name__)
 
 GAME = game_state.GameState()
+ZOOM_LEVEL = 1.0
 
 
 def main():
@@ -13,12 +14,16 @@ def main():
 
 @app.route("/")
 def index():
-    """Render the index page with window dimensions."""
+    """Render the index page with window dimensions and zoom level."""
     window_width = flask.request.args.get("width", type=int, default=800)
     window_height = flask.request.args.get("height", type=int, default=600)
+    zoom_level = flask.request.args.get("zoom", type=float, default=1.0)
     GAME.update()
     return flask.render_template(
-        "index.html", window_width=window_width, window_height=window_height
+        "index.html",
+        window_width=window_width,
+        window_height=window_height,
+        zoom_level=zoom_level,
     )
 
 
@@ -35,6 +40,16 @@ def update_cell():
     y = int(flask.request.args.get("y"))
     GAME.flip_cell(x, y)
     return GAME.board_to_html()
+
+
+@app.route("/zoom", methods=["POST"])
+def zoom():
+    """Update the zoom level and return the updated game state as HTML."""
+    global ZOOM_LEVEL
+    zoom_level = float(flask.request.args.get("zoom"))
+    ZOOM_LEVEL = zoom_level
+    return GAME.board_to_html()
+
 
 if __name__ == "__main__":
     main()
