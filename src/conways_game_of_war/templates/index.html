@@ -23,6 +23,11 @@
         transform: scale(1);
         transform-origin: 0 0;
       }
+      #status-bar {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body> 
@@ -32,6 +37,7 @@
       <h2>Player: {{ session['player'] }}</h2>
       <input type="range" id="zoom-level" min="0.5" max="2" step="0.1" value="1" oninput="resizeGameBoard()">
       <div id="game" hx-get="/game_state" hx-trigger="load" hx-swap="outerHTML"></div>
+      <div id="status-bar" hx-get="/player_energy" hx-trigger="load, every 5s"></div>
     </div>
     <script>
       function resizeGameBoard() {

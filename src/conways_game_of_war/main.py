@@ -72,5 +72,18 @@ def zoom():
     return GAME.board_to_html()
 
 
+@app.route("/player_energy")
+def player_energy():
+    """Return the player's energy level as HTML."""
+    player = flask.session.get("player")
+    if player == "player1":
+        energy_level = GAME.players[0].get_energy_level()
+    elif player == "player2":
+        energy_level = GAME.players[1].get_energy_level()
+    else:
+        energy_level = "Unknown player"
+    return f"<div>{energy_level}</div>"
+
+
 if __name__ == "__main__":
     main()
