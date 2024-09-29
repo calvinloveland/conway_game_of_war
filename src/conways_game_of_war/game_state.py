@@ -131,8 +131,14 @@ class GameState:
                     neighbor_cell = self.board[(x + i) % self.board_size_x][
                         (y + j) % self.board_size_y
                     ]
-                    if neighbor_cell.alive and neighbor_cell.owner is not None and neighbor_cell.owner != player:
-                        logger.info(f"Player {player} is fighting player {neighbor_cell.owner}")
+                    if (
+                        neighbor_cell.alive
+                        and neighbor_cell.owner is not None
+                        and neighbor_cell.owner != player
+                    ):
+                        logger.info(
+                            f"Player {player} is fighting player {neighbor_cell.owner}"
+                        )
                         neighbor_cell.alive = False
                         self.board[x][y].alive = False
                         return True
