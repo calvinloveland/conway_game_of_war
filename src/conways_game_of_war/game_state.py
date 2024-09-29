@@ -16,6 +16,7 @@ PLAYER_2_START_POINT = (DEFAULT_BOARD_SIZE_X - 20, DEFAULT_BOARD_SIZE_Y - 20)
 
 class Player:
     """Represents a player in the game."""
+
     def __init__(self, color, start_point):
         self.color = color
         self.start_point = start_point
@@ -24,6 +25,7 @@ class Player:
 
 class CellState:
     """Represents the state of a cell in the game."""
+
     def __init__(
         self, alive=False, immortal=False, crop_level=2.0 / (2**4), owner=None
     ):
@@ -36,7 +38,13 @@ class CellState:
 
 class GameState:
     """Represents the state of the game board."""
-    def __init__(self, board=None, board_size_x=DEFAULT_BOARD_SIZE_X, board_size_y=DEFAULT_BOARD_SIZE_Y):
+
+    def __init__(
+        self,
+        board=None,
+        board_size_x=DEFAULT_BOARD_SIZE_X,
+        board_size_y=DEFAULT_BOARD_SIZE_Y,
+    ):
         self.players = [
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
             Player(PLAYER_2_COLOR, PLAYER_2_START_POINT),
@@ -47,8 +55,7 @@ class GameState:
             self.board_size_x = len(self.board[0])
         else:
             self.board = [
-                [CellState() for _ in range(board_size_x)]
-                for _ in range(board_size_y)
+                [CellState() for _ in range(board_size_x)] for _ in range(board_size_y)
             ]
             self.board_size_y = len(self.board)
             self.board_size_x = len(self.board[0])
@@ -95,14 +102,21 @@ class GameState:
     def count_friendly_neighbors(self, x, y, player):
         """Count neighbors and wrap around the board."""
         count = 0
-        for i, j in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+        for i, j in [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]:
             if len(self.board) <= (x + i) % self.board_size_x:
                 logger.error(f"Index out of range: {(x + i) % self.board_size_x}")
             if len(self.board[0]) <= (y + j) % self.board_size_y:
                 logger.error(f"Index out of range: {(y + j) % self.board_size_y}")
-            cell = self.board[(x + i) % self.board_size_x][
-                (y + j) % self.board_size_y
-            ]
+            cell = self.board[(x + i) % self.board_size_x][(y + j) % self.board_size_y]
             if cell.alive and cell.owner == player:
                 count += 1
         return count
