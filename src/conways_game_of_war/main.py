@@ -1,3 +1,5 @@
+"""Main module for running the Conway's Game of War Flask application."""
+
 import flask
 from conways_game_of_war import game_state
 
@@ -45,8 +47,8 @@ def update_cell():
 @app.route("/zoom", methods=["POST"])
 def zoom():
     """Update the zoom level and return the updated game state as HTML."""
-    global ZOOM_LEVEL
     zoom_level = float(flask.request.args.get("zoom"))
+    global ZOOM_LEVEL
     ZOOM_LEVEL = zoom_level
     return GAME.board_to_html()
 
