@@ -1,9 +1,9 @@
-from conways_game_of_war.game_state import GameState, Player, CellState
+from conways_game_of_war.game_state import GameState, CellState, EasyAIPlayer, MediumAIPlayer, HardAIPlayer
 from loguru import logger
 
 
 def string_to_board(string):
-    """Convert a string to a board"""
+    """Convert a string to a board."""
     board = []
     for y, line in enumerate(string.split("\n")):
         for x, char in enumerate(line):
@@ -17,7 +17,7 @@ def string_to_board(string):
 
 
 def board_to_string(board):
-    """Convert a board to a string"""
+    """Convert a board to a string."""
     string = ""
     for x in range(len(board)):
         for y in range(len(board[0])):
@@ -29,8 +29,10 @@ def board_to_string(board):
     return string
 
 
+@logger.catch(reraise=True)
 def test_game_update():
-    """Test that a blinker works as expected
+    """
+    Test that a blinker works as expected.
     0 1 0
     0 1 0
     0 1 0
@@ -53,7 +55,7 @@ def test_game_update():
 
 @logger.catch(reraise=True)
 def test_count_friendly_neighbors():
-    """Test that the count_friendly_neighbors function works as expected"""
+    """Test that the count_friendly_neighbors function works as expected."""
     board = string_to_board("00000\n00X00\n00X00\n00X00\n00000\n00000")
     game = GameState(board)
     assert game.count_friendly_neighbors(0, 0, None) == 0
@@ -63,3 +65,35 @@ def test_count_friendly_neighbors():
     assert game.count_friendly_neighbors(4, 4, None) == 0
     assert game.count_friendly_neighbors(2, 1, None) == 3
     game.update()
+
+
+@logger.catch(reraise=True)
+def test_easy_ai_player():
+    """Test that the EasyAIPlayer makes a move."""
+    board = string_to_board("00000\n00000\n00000\n00000\n00000\n00000")
+    game = GameState(board)
+    game.ai_player = EasyAIPlayer(color=(0, 255, 0), start_point=(0, 0))
+    game.update()
+    assert any(cell.alive for row in game.board for cell in row)
+
+
+@logger.catch(reraise=True)
+def test_medium_ai_player():
+    """Test that the MediumAIPlayer makes a move."""
+    board = string_to_board("00000\n00000\n00000\n00000\n00000\n00000")
+    game = GameState(board)
+    game.ai_player = MediumAIPlayer(color=(0, 255, 0), start_point=(0, 0))
+    game.update()
+    # Implement a more advanced strategy test here
+    pass
+
+
+@logger.catch(reraise=True)
+def test_hard_ai_player():
+    """Test that the HardAIPlayer makes a move."""
+    board = string_to_board("00000\n00000\n00000\n00000\n00000\n00000")
+    game = GameState(board)
+    game.ai_player = HardAIPlayer(color=(0, 255, 0), start_point=(0, 0))
+    game.update()
+    # Implement a more advanced strategy test here
+    pass

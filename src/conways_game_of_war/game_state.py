@@ -1,5 +1,8 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
+
 from loguru import logger
+from dataclasses import dataclass
+import random
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
@@ -14,26 +17,70 @@ PLAYER_1_START_POINT = (20, 20)
 PLAYER_2_START_POINT = (DEFAULT_BOARD_SIZE_X - 20, DEFAULT_BOARD_SIZE_Y - 20)
 
 
+@dataclass
 class Player:
     """Represents a player in the game."""
 
-    def __init__(self, color, start_point):
-        self.color = color
-        self.start_point = start_point
-        self.energy = 0.0
+    color: tuple
+    start_point: tuple
+    energy: float = 0.0
+
+    def get_energy_level(self):
+        """Return the player's energy level as a string."""
+        return f"Energy: {self.energy}"
 
 
+@dataclass
 class CellState:
     """Represents the state of a cell in the game."""
 
-    def __init__(
-        self, alive=False, immortal=False, crop_level=2.0 / (2**4), owner=None
-    ):
-        self.alive = alive
-        self.immortal = immortal
-        self.crop_level = crop_level
-        self.owner = owner
-        self.friendly_neighbors = 0
+    alive: bool = False
+    immortal: bool = False
+    crop_level: float = 2.0 / (2**4)
+    owner: Player = None
+    friendly_neighbors: int = 0
+
+
+class AIPlayer(Player):
+    """Represents an AI player in the game."""
+
+    def make_move(self, game_state):
+        """Determine the AI's move."""
+        pass
+
+
+class EasyAIPlayer(AIPlayer):
+    """Represents an easy AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a random move."""
+        empty_cells = [
+            (x, y)
+            for x in range(game_state.board_size_x)
+            for y in range(game_state.board_size_y)
+            if not game_state.board[x][y].alive
+        ]
+        if empty_cells:
+            x, y = random.choice(empty_cells)
+            game_state.flip_cell(x, y)
+
+
+class MediumAIPlayer(AIPlayer):
+    """Represents a medium AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a move targeting specific areas of the board."""
+        # Implement a more advanced strategy here
+        pass
+
+
+class HardAIPlayer(AIPlayer):
+    """Represents a hard AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a move targeting the opponent's weak spots."""
+        # Implement a more advanced strategy here
+        pass
 
 
 class GameState:
@@ -49,6 +96,7 @@ class GameState:
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
             Player(PLAYER_2_COLOR, PLAYER_2_START_POINT),
         ]
+        self.ai_player = None
         if board is not None:
             self.board = board
             self.board_size_y = len(self.board)
@@ -197,6 +245,8 @@ class GameState:
         for x in range(self.board_size_x):
             for y in range(self.board_size_y):
                 self.update_cell(x, y)
+        if self.ai_player:
+            self.ai_player.make_move(self)
         return self.board
 
     def generate_cell_color(self, x, y):
@@ -226,15 +276,29 @@ class GameState:
             for x in range(self.board_size_x):
                 color = self.generate_cell_color(x, y)
                 border_color = self.generate_cell_border_color(x, y)
-                internal_div = f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' style='height:5px;width:5px'></div>"
+                internal_div = (
+                    f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
+                    "style='height:5px;width:5px'></div>"
+                )
                 if self.board[x][y].owner is None or self.board[x][y].immortal:
                     internal_div = "<div style='height:5px;width:5px'></div>"
-                html += f"<td style='min-width=5px; min-height=5px; background-color:rgb({color[0]},{color[1]},{color[2]}); border: 1px solid rgb({border_color[0]},{border_color[1]},{border_color[2]});'>{internal_div}</td>"
+                html += (
+                    f"<td style='min-width=5px; min-height=5px; background-color:rgb("
+                    f"{color[0]},{color[1]},{color[2]}); border: 1px solid rgb("
+                    f"{border_color[0]},{border_color[1]},{border_color[2]});'>"
+                    f"{internal_div}</td>"
+                )
             html += "</tr>"
         html += "</table>"
         return html
 
     def flip_cell(self, x, y):
         """Flip the state of a cell."""
-        self.board[x][y].alive = not self.board[x][y].alive
+        if self.is_cell_owned_by_player(x, y):
+            self.board[x][y].alive = not self.board[x][y].alive
         return self.board[x][y].alive
+
+    def is_cell_owned_by_player(self, x, y):
+        """Check if a cell is owned by the current player."""
+        cell = self.board[x][y]
+        return cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]
