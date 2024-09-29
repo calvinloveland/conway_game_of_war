@@ -2,6 +2,7 @@
 
 from loguru import logger
 from dataclasses import dataclass
+import random
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
@@ -36,6 +37,48 @@ class CellState:
     friendly_neighbors: int = 0
 
 
+class AIPlayer(Player):
+    """Represents an AI player in the game."""
+
+    def make_move(self, game_state):
+        """Determine the AI's move."""
+        pass
+
+
+class EasyAIPlayer(AIPlayer):
+    """Represents an easy AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a random move."""
+        empty_cells = [
+            (x, y)
+            for x in range(game_state.board_size_x)
+            for y in range(game_state.board_size_y)
+            if not game_state.board[x][y].alive
+        ]
+        if empty_cells:
+            x, y = random.choice(empty_cells)
+            game_state.flip_cell(x, y)
+
+
+class MediumAIPlayer(AIPlayer):
+    """Represents a medium AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a move targeting specific areas of the board."""
+        # Implement a more advanced strategy here
+        pass
+
+
+class HardAIPlayer(AIPlayer):
+    """Represents a hard AI player in the game."""
+
+    def make_move(self, game_state):
+        """Make a move targeting the opponent's weak spots."""
+        # Implement a more advanced strategy here
+        pass
+
+
 class GameState:
     """Represents the state of the game board."""
 
@@ -49,6 +92,7 @@ class GameState:
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
             Player(PLAYER_2_COLOR, PLAYER_2_START_POINT),
         ]
+        self.ai_player = None
         if board is not None:
             self.board = board
             self.board_size_y = len(self.board)
@@ -197,6 +241,8 @@ class GameState:
         for x in range(self.board_size_x):
             for y in range(self.board_size_y):
                 self.update_cell(x, y)
+        if self.ai_player:
+            self.ai_player.make_move(self)
         return self.board
 
     def generate_cell_color(self, x, y):

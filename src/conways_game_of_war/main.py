@@ -43,6 +43,8 @@ def set_player():
     """Set the selected player in the session."""
     player = flask.request.form.get("player")
     flask.session["player"] = player
+    ai_difficulty = flask.request.form.get("ai_difficulty")
+    flask.session["ai_difficulty"] = ai_difficulty
     return flask.redirect("/")
 
 
