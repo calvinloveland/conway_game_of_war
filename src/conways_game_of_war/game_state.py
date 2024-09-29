@@ -1,7 +1,6 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
 from loguru import logger
 
-
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
 
@@ -41,11 +40,15 @@ class GameState:
         ]
         if board is not None:
             self.board = board
+            self.board_size_y = len(self.board)
+            self.board_size_x = len(self.board[0])
         else:
             self.board = [
-                [CellState() for _ in range(DEFAULT_BOARD_SIZE_Y)]
-                for _ in range(DEFAULT_BOARD_SIZE_X)
+                [CellState() for _ in range(DEFAULT_BOARD_SIZE_X)]
+                for _ in range(DEFAULT_BOARD_SIZE_Y)
             ]
+            self.board_size_y = len(self.board)
+            self.board_size_x = len(self.board[0])
             self.init_players()
         self.board_size_x = len(self.board)
         logger.debug(f"Board size x: {self.board_size_x}")
@@ -128,14 +131,8 @@ class GameState:
                     neighbor_cell = self.board[(x + i) % self.board_size_x][
                         (y + j) % self.board_size_y
                     ]
-                    if (
-                        neighbor_cell.alive
-                        and neighbor_cell.owner is not None
-                        and neighbor_cell.owner != player
-                    ):
-                        print(
-                            f"Player {player} is fighting player {neighbor_cell.owner}"
-                        )
+                    if neighbor_cell.alive and neighbor_cell.owner is not None and neighbor_cell.owner != player:
+                        logger.info(f"Player {player} is fighting player {neighbor_cell.owner}")
                         neighbor_cell.alive = False
                         self.board[x][y].alive = False
                         return True
