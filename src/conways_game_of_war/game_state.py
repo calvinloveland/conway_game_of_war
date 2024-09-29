@@ -25,6 +25,10 @@ class Player:
     start_point: tuple
     energy: float = 0.0
 
+    def get_energy_level(self):
+        """Return the player's energy level as a string."""
+        return f"Energy: {self.energy}"
+
 
 @dataclass
 class CellState:
