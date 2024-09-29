@@ -1,5 +1,6 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
 from loguru import logger
+from dataclasses import dataclass
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
@@ -14,26 +15,22 @@ PLAYER_1_START_POINT = (20, 20)
 PLAYER_2_START_POINT = (DEFAULT_BOARD_SIZE_X - 20, DEFAULT_BOARD_SIZE_Y - 20)
 
 
+@dataclass
 class Player:
     """Represents a player in the game."""
-
-    def __init__(self, color, start_point):
-        self.color = color
-        self.start_point = start_point
-        self.energy = 0.0
+    color: tuple
+    start_point: tuple
+    energy: float = 0.0
 
 
+@dataclass
 class CellState:
     """Represents the state of a cell in the game."""
-
-    def __init__(
-        self, alive=False, immortal=False, crop_level=2.0 / (2**4), owner=None
-    ):
-        self.alive = alive
-        self.immortal = immortal
-        self.crop_level = crop_level
-        self.owner = owner
-        self.friendly_neighbors = 0
+    alive: bool = False
+    immortal: bool = False
+    crop_level: float = 2.0 / (2**4)
+    owner: Player = None
+    friendly_neighbors: int = 0
 
 
 class GameState:
@@ -226,10 +223,18 @@ class GameState:
             for x in range(self.board_size_x):
                 color = self.generate_cell_color(x, y)
                 border_color = self.generate_cell_border_color(x, y)
-                internal_div = f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' style='height:5px;width:5px'></div>"
+                internal_div = (
+                    f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
+                    "style='height:5px;width:5px'></div>"
+                )
                 if self.board[x][y].owner is None or self.board[x][y].immortal:
                     internal_div = "<div style='height:5px;width:5px'></div>"
-                html += f"<td style='min-width=5px; min-height=5px; background-color:rgb({color[0]},{color[1]},{color[2]}); border: 1px solid rgb({border_color[0]},{border_color[1]},{border_color[2]});'>{internal_div}</td>"
+                html += (
+                    f"<td style='min-width=5px; min-height=5px; background-color:rgb("
+                    f"{color[0]},{color[1]},{color[2]}); border: 1px solid rgb("
+                    f"{border_color[0]},{border_color[1]},{border_color[2]});'>"
+                    f"{internal_div}</td>"
+                )
             html += "</tr>"
         html += "</table>"
         return html
