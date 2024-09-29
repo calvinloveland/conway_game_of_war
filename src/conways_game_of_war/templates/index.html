@@ -20,6 +20,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transform: scale(1);
+        transform-origin: 0 0;
       }
     </style>
   </head>
@@ -27,6 +29,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <div class="container">
       <h1>Conway's Game of War</h1>
+      <input type="range" id="zoom-level" min="0.5" max="2" step="0.1" value="1" oninput="resizeGameBoard()">
       <div id="game" hx-get="/game_state" hx-trigger="load" hx-swap="outerHTML"></div>
     </div>
     <script>
@@ -35,12 +38,29 @@
         const container = document.querySelector('.container');
         const containerHeight = container.clientHeight;
         const containerWidth = container.clientWidth;
+        const zoomLevel = document.getElementById('zoom-level').value;
         gameBoard.style.height = `${containerHeight}px`;
         gameBoard.style.width = `${containerWidth}px`;
+        gameBoard.style.transform = `scale(${zoomLevel})`;
       }
 
       window.addEventListener('resize', resizeGameBoard);
       window.addEventListener('load', resizeGameBoard);
+
+      function handleZoom(event) {
+        event.preventDefault();
+        const zoomLevelInput = document.getElementById('zoom-level');
+        let zoomLevel = parseFloat(zoomLevelInput.value);
+        if (event.deltaY < 0) {
+          zoomLevel = Math.min(zoomLevel + 0.1, 2);
+        } else {
+          zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+        }
+        zoomLevelInput.value = zoomLevel;
+        resizeGameBoard();
+      }
+
+      window.addEventListener('wheel', handleZoom);
     </script>
   </body>
 </html>
