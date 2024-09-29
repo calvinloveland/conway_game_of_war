@@ -33,7 +33,7 @@ class CellState:
 
 
 class GameState:
-    def __init__(self, board=None):
+    def __init__(self, board=None, board_size_x=DEFAULT_BOARD_SIZE_X, board_size_y=DEFAULT_BOARD_SIZE_Y):
         self.players = [
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
             Player(PLAYER_2_COLOR, PLAYER_2_START_POINT),
@@ -44,8 +44,8 @@ class GameState:
             self.board_size_x = len(self.board[0])
         else:
             self.board = [
-                [CellState() for _ in range(DEFAULT_BOARD_SIZE_X)]
-                for _ in range(DEFAULT_BOARD_SIZE_Y)
+                [CellState() for _ in range(board_size_x)]
+                for _ in range(board_size_y)
             ]
             self.board_size_y = len(self.board)
             self.board_size_x = len(self.board[0])

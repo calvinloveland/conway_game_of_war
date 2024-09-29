@@ -2,6 +2,26 @@
 <html>
   <head>
     <title>Conway's Game of War</title>
+    <style>
+      body, html {
+        height: 100%;
+        margin: 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+      #game {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
   </head>
   <body> 
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -9,4 +29,18 @@
       <h1>Conway's Game of War</h1>
       <div id="game" hx-get="/game_state" hx-trigger="load" hx-swap="outerHTML"></div>
     </div>
+    <script>
+      function resizeGameBoard() {
+        const gameBoard = document.getElementById('game');
+        const container = document.querySelector('.container');
+        const containerHeight = container.clientHeight;
+        const containerWidth = container.clientWidth;
+        gameBoard.style.height = `${containerHeight}px`;
+        gameBoard.style.width = `${containerWidth}px`;
+      }
+
+      window.addEventListener('resize', resizeGameBoard);
+      window.addEventListener('load', resizeGameBoard);
+    </script>
   </body>
+</html>

@@ -12,8 +12,10 @@ def main():
 
 @app.route("/")
 def index():
+    window_width = flask.request.args.get("width", type=int, default=800)
+    window_height = flask.request.args.get("height", type=int, default=600)
     GAME.update()
-    return flask.render_template("index.html")
+    return flask.render_template("index.html", window_width=window_width, window_height=window_height)
 
 
 @app.route("/game_state")
