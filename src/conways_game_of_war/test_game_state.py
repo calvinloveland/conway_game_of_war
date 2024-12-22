@@ -1,5 +1,12 @@
-from conways_game_of_war.game_state import GameState, CellState, EasyAIPlayer, MediumAIPlayer, HardAIPlayer
 from loguru import logger
+
+from conways_game_of_war.game_state import (
+    CellState,
+    EasyAIPlayer,
+    GameState,
+    HardAIPlayer,
+    MediumAIPlayer,
+)
 
 
 def string_to_board(string):

@@ -1,8 +1,9 @@
 """Conway's game of life but with some extra sauce to enable WAR!"""
 
-from loguru import logger
-from dataclasses import dataclass
 import random
+from dataclasses import dataclass
+
+from loguru import logger
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
@@ -268,9 +269,7 @@ class GameState:
 
     def board_to_html(self):
         """Convert the board to an html string."""
-        html = (
-            "<style>table {border-collapse: collapse;} td {padding: 0;}</style><table>"
-        )
+        html = "<style>table {border-collapse: collapse;} td {padding: 0;}</style><table id='game'>"
         for y in range(self.board_size_y):
             html += "<tr>"
             for x in range(self.board_size_x):
@@ -301,4 +300,6 @@ class GameState:
     def is_cell_owned_by_player(self, x, y):
         """Check if a cell is owned by the current player."""
         cell = self.board[x][y]
-        return cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]
+        return (
+            cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]
+        )
