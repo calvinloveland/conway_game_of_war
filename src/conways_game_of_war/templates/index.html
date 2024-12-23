@@ -28,13 +28,16 @@
         text-align: center;
         margin-top: 10px;
       }
+      .player-name {
+        color: {{ session['player1_color'] if session['player'] == 'player1' else session['player2_color'] }};
+      }
     </style>
   </head>
   <body> 
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <div class="container">
       <h1>Conway's Game of War</h1>
-      <h2>Player: {{ session['player'] }}</h2>
+      <h2 class="player-name">Player: {{ session['player'] }}</h2>
       <input type="range" id="zoom-level" min="0.5" max="2" step="0.1" value="1" oninput="resizeGameBoard()">
       <div id="game" hx-get="/game_state" hx-trigger="load" hx-swap="outerHTML"></div>
       <div id="status-bar" hx-get="/player_energy" hx-trigger="load, every 5s"></div>
