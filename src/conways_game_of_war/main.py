@@ -1,6 +1,7 @@
 """Main module for running the Conway's Game of War Flask application."""
 
 import flask
+
 from conways_game_of_war import game_state
 
 app = flask.Flask(__name__)
