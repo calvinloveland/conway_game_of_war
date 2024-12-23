@@ -46,6 +46,10 @@ def set_player():
     flask.session["player"] = player
     ai_difficulty = flask.request.form.get("ai_difficulty")
     flask.session["ai_difficulty"] = ai_difficulty
+    player1_color = flask.request.form.get("player1_color")
+    player2_color = flask.request.form.get("player2_color")
+    flask.session["player1_color"] = player1_color
+    flask.session["player2_color"] = player2_color
     return flask.redirect("/")
 
 
