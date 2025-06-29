@@ -277,7 +277,7 @@ class GameState:
                 border_color = self.generate_cell_border_color(x, y)
                 internal_div = (
                     f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
-                    "hx-target='#game' style='height:5px;width:5px'></div>"
+                    f"hx-target='#game' style='height:5px;width:5px'></div>"
                 )
                 if self.board[x][y].owner is None or self.board[x][y].immortal:
                     internal_div = "<div style='height:5px;width:5px'></div>"
