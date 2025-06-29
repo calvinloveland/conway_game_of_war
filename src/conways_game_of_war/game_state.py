@@ -269,7 +269,7 @@ class GameState:
 
     def board_to_html(self):
         """Convert the board to an html string."""
-        html = "<style>table {border-collapse: collapse;} td {padding: 0;}</style><table id='game'>"
+        html = "<div id='game'><style>table {border-collapse: collapse;} td {padding: 0;}</style><table>"
         for y in range(self.board_size_y):
             html += "<tr>"
             for x in range(self.board_size_x):
@@ -277,7 +277,7 @@ class GameState:
                 border_color = self.generate_cell_border_color(x, y)
                 internal_div = (
                     f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
-                    "style='height:5px;width:5px'></div>"
+                    "hx-target='#game' style='height:5px;width:5px'></div>"
                 )
                 if self.board[x][y].owner is None or self.board[x][y].immortal:
                     internal_div = "<div style='height:5px;width:5px'></div>"
@@ -288,7 +288,7 @@ class GameState:
                     f"{internal_div}</td>"
                 )
             html += "</tr>"
-        html += "</table>"
+        html += "</table></div>"
         return html
 
     def flip_cell(self, x, y):
