@@ -144,9 +144,9 @@ class GameState:
             if cell.owner is not None
             else 0
         )
-        for i in range(len(self.players)):
+        for i, player in enumerate(self.players):
             if player_counts[i] > current_owner_count:
-                cell.owner = self.players[i]
+                cell.owner = player
 
     def count_friendly_neighbors(self, x, y, player):
         """Count neighbors and wrap around the board."""
@@ -226,7 +226,8 @@ class GameState:
             # The cell dies if it has more than 3 friendly neighbors
             elif friendly_neighbors > 3:
                 logger.debug(
-                    f"Cell at {x}, {y} is overpopulated with {friendly_neighbors} friendly neighbors"
+                    f"Cell at {x}, {y} is overpopulated with "
+                    f"{friendly_neighbors} friendly neighbors"
                 )
                 cell.alive = False
         else:
@@ -269,7 +270,11 @@ class GameState:
 
     def board_to_html(self):
         """Convert the board to an html string."""
-        html = "<style>table {border-collapse: collapse;} td {padding: 0;}</style><table id='game'>"
+        html = (
+            "<div id='game'>"
+            "<style>table {border-collapse: collapse;} td {padding: 0;}</style>"
+            "<table>"
+        )
         for y in range(self.board_size_y):
             html += "<tr>"
             for x in range(self.board_size_x):
@@ -277,7 +282,7 @@ class GameState:
                 border_color = self.generate_cell_border_color(x, y)
                 internal_div = (
                     f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
-                    "style='height:5px;width:5px'></div>"
+                    f"hx-target='#game' style='height:5px;width:5px'></div>"
                 )
                 if self.board[x][y].owner is None or self.board[x][y].immortal:
                     internal_div = "<div style='height:5px;width:5px'></div>"
@@ -288,11 +293,14 @@ class GameState:
                     f"{internal_div}</td>"
                 )
             html += "</tr>"
-        html += "</table>"
+        html += "</table></div>"
         return html
 
     def flip_cell(self, x, y):
         """Flip the state of a cell."""
+        cell = self.board[x][y]
+        if cell.owner is None and self.ai_player is not None:
+            cell.owner = self.ai_player
         if self.is_cell_owned_by_player(x, y):
             self.board[x][y].alive = not self.board[x][y].alive
         return self.board[x][y].alive
@@ -301,5 +309,7 @@ class GameState:
         """Check if a cell is owned by the current player."""
         cell = self.board[x][y]
         return (
-            cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]
+            cell.owner == self.players[PLAYER_1]
+            or cell.owner == self.players[PLAYER_2]
+            or (self.ai_player is not None and cell.owner == self.ai_player)
         )
