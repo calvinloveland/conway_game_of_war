@@ -144,9 +144,9 @@ class GameState:
             if cell.owner is not None
             else 0
         )
-        for i in range(len(self.players)):
+        for i, player in enumerate(self.players):
             if player_counts[i] > current_owner_count:
-                cell.owner = self.players[i]
+                cell.owner = player
 
     def count_friendly_neighbors(self, x, y, player):
         """Count neighbors and wrap around the board."""
@@ -226,7 +226,8 @@ class GameState:
             # The cell dies if it has more than 3 friendly neighbors
             elif friendly_neighbors > 3:
                 logger.debug(
-                    f"Cell at {x}, {y} is overpopulated with {friendly_neighbors} friendly neighbors"
+                    f"Cell at {x}, {y} is overpopulated with "
+                    f"{friendly_neighbors} friendly neighbors"
                 )
                 cell.alive = False
         else:
@@ -269,7 +270,11 @@ class GameState:
 
     def board_to_html(self):
         """Convert the board to an html string."""
-        html = "<div id='game'><style>table {border-collapse: collapse;} td {padding: 0;}</style><table>"
+        html = (
+            "<div id='game'>"
+            "<style>table {border-collapse: collapse;} td {padding: 0;}</style>"
+            "<table>"
+        )
         for y in range(self.board_size_y):
             html += "<tr>"
             for x in range(self.board_size_x):
@@ -304,6 +309,7 @@ class GameState:
         """Check if a cell is owned by the current player."""
         cell = self.board[x][y]
         return (
-            cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2] or 
-            (self.ai_player is not None and cell.owner == self.ai_player)
+            cell.owner == self.players[PLAYER_1]
+            or cell.owner == self.players[PLAYER_2]
+            or (self.ai_player is not None and cell.owner == self.ai_player)
         )
