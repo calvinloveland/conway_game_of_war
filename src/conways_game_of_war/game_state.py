@@ -293,6 +293,9 @@ class GameState:
 
     def flip_cell(self, x, y):
         """Flip the state of a cell."""
+        cell = self.board[x][y]
+        if cell.owner is None and self.ai_player is not None:
+            cell.owner = self.ai_player
         if self.is_cell_owned_by_player(x, y):
             self.board[x][y].alive = not self.board[x][y].alive
         return self.board[x][y].alive
@@ -301,5 +304,6 @@ class GameState:
         """Check if a cell is owned by the current player."""
         cell = self.board[x][y]
         return (
-            cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2]
+            cell.owner == self.players[PLAYER_1] or cell.owner == self.players[PLAYER_2] or 
+            (self.ai_player is not None and cell.owner == self.ai_player)
         )
