@@ -2,11 +2,13 @@
 
 import random
 from dataclasses import dataclass
+from typing import Optional
 
 from loguru import logger
 
 DEFAULT_BOARD_SIZE_X = 127
 DEFAULT_BOARD_SIZE_Y = 131
+CELL_PX = 12
 
 PLAYER_1 = 0
 PLAYER_2 = 1
@@ -38,7 +40,7 @@ class CellState:
     alive: bool = False
     immortal: bool = False
     crop_level: float = 2.0 / (2**4)
-    owner: Player = None
+    owner: Optional[Player] = None
     friendly_neighbors: int = 0
 
 
@@ -54,16 +56,40 @@ class EasyAIPlayer(AIPlayer):
     """Represents an easy AI player in the game."""
 
     def make_move(self, game_state):
-        """Make a random move."""
-        empty_cells = [
-            (x, y)
-            for x in range(game_state.board_size_x)
-            for y in range(game_state.board_size_y)
-            if not game_state.board[x][y].alive
-        ]
-        if empty_cells:
-            x, y = random.choice(empty_cells)
-            game_state.flip_cell(x, y)
+        """Make a random move for the AI player's side, only on frontier cells."""
+        idx = (
+            game_state.ai_player_index
+            if game_state.ai_player_index is not None
+            else PLAYER_2
+        )
+        player_obj = game_state.players[idx]
+        frontier = []
+        for x in range(game_state.board_size_x):
+            for y in range(game_state.board_size_y):
+                cell = game_state.board[x][y]
+                if cell.alive:
+                    continue
+                # Do not place on opponent-owned territory
+                if cell.owner is not None and cell.owner != player_obj:
+                    continue
+                # Only place adjacent to your alive owned cells
+                if game_state.count_friendly_neighbors(x, y, player_obj) > 0:
+                    frontier.append((x, y))
+        if not frontier:
+            # fallback to near start point neighborhood
+            sx, sy = player_obj.start_point
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    nx = (sx + i) % game_state.board_size_x
+                    ny = (sy + j) % game_state.board_size_y
+                    cell = game_state.board[nx][ny]
+                    if (not cell.alive) and (cell.owner in (None, player_obj)):
+                        frontier.append((nx, ny))
+        if frontier:
+            x, y = random.choice(frontier)
+            target = game_state.board[x][y]
+            target.owner = player_obj
+            target.alive = True
 
 
 class MediumAIPlayer(AIPlayer):
@@ -97,7 +123,8 @@ class GameState:
             Player(PLAYER_1_COLOR, PLAYER_1_START_POINT),
             Player(PLAYER_2_COLOR, PLAYER_2_START_POINT),
         ]
-        self.ai_player = None
+        self.ai_player: Optional[AIPlayer] = None
+        self.ai_player_index: Optional[int] = None
         if board is not None:
             self.board = board
             self.board_size_y = len(self.board)
@@ -250,14 +277,22 @@ class GameState:
             self.ai_player.make_move(self)
         return self.board
 
+    def _clamp_rgb(self, r, g, b):
+        r = int(max(0, min(255, r)))
+        g = int(max(0, min(255, g)))
+        b = int(max(0, min(255, b)))
+        return (r, g, b)
+
     def generate_cell_color(self, x, y):
         """Generate the color of a cell."""
-        color = (50, 50, 50)
+        base = (50, 50, 50)
         cell = self.board[x][y]
         if cell.alive and cell.owner is not None:
-            color = cell.owner.color
-        color = (color[0], color[1] + ((255 / 2) * cell.crop_level), color[2])
-        return color
+            base = cell.owner.color
+        # Boost green channel by crop level for a subtle growth effect
+        r, g, b = base
+        g = g + (255 / 2) * cell.crop_level
+        return self._clamp_rgb(r, g, b)
 
     def generate_cell_border_color(self, x, y):
         """Generate the border color of a cell."""
@@ -265,11 +300,40 @@ class GameState:
         cell = self.board[x][y]
         if cell.owner is not None:
             color = cell.owner.color
-        return color
+        return self._clamp_rgb(*color)
 
-    def board_to_html(self):
-        """Convert the board to an html string."""
-        html = "<style>table {border-collapse: collapse;} td {padding: 0;}</style><table id='game'>"
+    def board_to_html(self, current_player_index: Optional[int] = None):
+        """Convert the board to an html string, with data for client-side zoom."""
+        # Determine bounding box of the current player's controlled area
+        if current_player_index is not None:
+            xmin, ymin = self.board_size_x, self.board_size_y
+            xmax, ymax = -1, -1
+            player_obj = self.players[current_player_index]
+            for x in range(self.board_size_x):
+                for y in range(self.board_size_y):
+                    cell = self.board[x][y]
+                    if cell.owner == player_obj and (cell.alive or cell.immortal):
+                        if x < xmin:
+                            xmin = x
+                        if y < ymin:
+                            ymin = y
+                        if x > xmax:
+                            xmax = x
+                        if y > ymax:
+                            ymax = y
+            if xmax < xmin or ymax < ymin:
+                # fallback to start point area
+                sx, sy = player_obj.start_point
+                xmin, ymin, xmax, ymax = sx, sy, sx, sy
+        else:
+            xmin, ymin, xmax, ymax = 0, 0, self.board_size_x - 1, self.board_size_y - 1
+
+        html = (
+            "<style>table {border-collapse: collapse;} td {padding: 0;} #game{transform-origin:0 0;}</style>"
+            f"<table id='game' data-bbox-xmin='{xmin}' data-bbox-ymin='{ymin}' "
+            f"data-bbox-xmax='{xmax}' data-bbox-ymax='{ymax}' data-cell-px='{CELL_PX}' "
+            f"data-board-w='{self.board_size_x}' data-board-h='{self.board_size_y}'>"
+        )
         for y in range(self.board_size_y):
             html += "<tr>"
             for x in range(self.board_size_x):
@@ -277,12 +341,15 @@ class GameState:
                 border_color = self.generate_cell_border_color(x, y)
                 internal_div = (
                     f"<div hx-trigger='click' hx-post='/update_cell?x={x}&y={y}' "
-                    "style='height:5px;width:5px'></div>"
+                    "hx-target='#game' hx-swap='outerHTML' "
+                    f"style='height:{CELL_PX}px;width:{CELL_PX}px'></div>"
                 )
-                if self.board[x][y].owner is None or self.board[x][y].immortal:
-                    internal_div = "<div style='height:5px;width:5px'></div>"
+                if self.board[x][y].immortal:
+                    internal_div = (
+                        f"<div style='height:{CELL_PX}px;width:{CELL_PX}px'></div>"
+                    )
                 html += (
-                    f"<td style='min-width=5px; min-height=5px; background-color:rgb("
+                    f"<td style='width:{CELL_PX}px; height:{CELL_PX}px; background-color:rgb("
                     f"{color[0]},{color[1]},{color[2]}); border: 1px solid rgb("
                     f"{border_color[0]},{border_color[1]},{border_color[2]});'>"
                     f"{internal_div}</td>"

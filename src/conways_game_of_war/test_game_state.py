@@ -50,6 +50,8 @@ def test_game_update():
     """
     board = string_to_board("00000\n00X00\n00X00\n00X00\n00000\n00000")
     game = GameState(board)
+    # Shape sanity
+    assert len(game.board) == game.board_size_x or len(game.board) == game.board_size_y
     print(board_to_string(game.board))
     assert game.board[1][2].alive
     game.update()
